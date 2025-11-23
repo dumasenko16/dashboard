@@ -59,7 +59,7 @@ st.markdown("""
 st.sidebar.title("📊 Навигация")
 page = st.sidebar.radio(
     "Раздел:",
-    ["Главная", "Динамика", "Процентные изменения", "Анализ по сменам"]
+    ["Главная", "Динамика", "Анализ по сменам"]
 )
 
 uploaded_file = st.sidebar.file_uploader("📤 Загрузите Excel-файл", type=["xlsx"])
@@ -381,72 +381,7 @@ if uploaded_file:
     # ======== БЛОК ИНФОРМАЦИИ О ДАННЫХ ========
     st.title("📦 Дашборд по складу: динамика и показатели")
     
-    # Информация о данных сразу под заголовком
-    st.markdown("### 📊 Информация о загруженных данных")
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(f"""
-        <div class='info-card'>
-            <h4>📁 Размер данных</h4>
-            <p><strong>Строк:</strong> {df.shape[0]}</p>
-            <p><strong>Столбцов:</strong> {df.shape[1]}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div class='info-card'>
-            <h4>📅 Диапазон дат</h4>
-            <p><strong>Начало:</strong> {df['Дата'].min()}</p>
-            <p><strong>Конец:</strong> {df['Дата'].max()}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        numeric_count = len(numeric_cols)
-        categorical_count = df.shape[1] - numeric_count
-        
-        # Информация о номерах смен
-        shift_counts = df["№ смены"].value_counts()
-        st.markdown(f"""
-        <div class='info-card'>
-            <h4>📈 Типы данных</h4>
-            <p><strong>Числовые:</strong> {numeric_count}</p>
-            <p><strong>Категориальные:</strong> {categorical_count}</p>
-            <p><strong>Уникальных смен:</strong> {len(shift_counts)}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Отображение списка столбцов
-    st.markdown("#### 📋 Список столбцов")
-    columns_info = []
-    for i, col in enumerate(df.columns, 1):
-        dtype = str(df[col].dtype)
-        non_null = df[col].count()
-        total = len(df)
-        columns_info.append(f"{i}. **{col}** (*{dtype}*) - {non_null}/{total} заполнено")
-    
-    st.write("\n".join(columns_info))
-    
-    # Показываем уникальные значения времени и смен для проверки
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### 🕐 Уникальные значения времени")
-        st.write(df["Время"].value_counts())
-    
-    with col2:
-        st.markdown("#### 🔢 Уникальные значения смен")
-        st.write(df["№ смены"].value_counts().sort_index())
-    
-    # Первые 5 строк
-    st.markdown("#### 👀 Первые 5 строк данных")
-    st.dataframe(df.head(), use_container_width=True)
-    
-    st.markdown("---")
-
     # ======== KPI БЛОК ========
     st.subheader("🔹 Сводные KPI за выбранный период")
 
@@ -495,14 +430,6 @@ if uploaded_file:
             
             st.plotly_chart(fig, use_container_width=True)
 
-    # ======== ПРОЦЕНТНЫЕ ИЗМЕНЕНИЯ ========
-    elif page == "Процентные изменения":
-        st.markdown("### 📊 Процентные изменения показателей")
-        df_change = df_filtered.copy()
-        for col in numeric_cols:
-            if col in df_change.columns:
-                df_change[f"Δ {col} (%)"] = df_change[col].pct_change() * 100
-        st.dataframe(df_change, use_container_width=True)
 
     # ======== АНАЛИЗ ПО СМЕНАМ ========
     elif page == "Анализ по сменам":
